@@ -34,8 +34,10 @@ def sample(
     Returns:
         Tensor of output class indices (1-d, int64).
     """
+
     model.eval()
     seq = x
+
     for _ in range(output_length):
         inputs = seq[-block_size:].unsqueeze(0)
         logits = model.forward(inputs).squeeze(0)[-1]
@@ -43,10 +45,12 @@ def sample(
             logits[exclude_classes] = float('-inf')
         logits = logits / temperature
         probas = logits.softmax(dim=-1)
+
         if top_k:
             probas, indices = probas.topk(top_k)
         else:
             indices = torch.arange(probas.size(-1))
+
         if top_p:
             sorted_probas, sorted_indices = probas.sort()  # ascending sort simplifies the following
             cumprobas = sorted_probas.cumsum(-1)
@@ -54,8 +58,10 @@ def sample(
             nucleus_indices = sorted_indices[-nucleus_size:]
             probas = sorted_probas[-nucleus_size:]
             indices = indices[nucleus_indices]
+
         index = probas.multinomial(1, generator=generator)
         if index == eos_class:
             break
         seq = torch.cat([seq, indices[index]])
+
     return seq[x.size(-1):]

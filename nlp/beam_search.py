@@ -76,7 +76,7 @@ def beam_search(
         if not branches:
             break
 
-    output = max(nodes, key=lambda node: (node.path[-1] == eos_class, node.score))
+    output = max(nodes, key=lambda node: (node.path[-1] == eos_class, node.score)).path
     if output[-1] == eos_class:
         output = output[:-1]
     return output

@@ -21,7 +21,7 @@ def beam_search(model, x, beam_width, output_length, block_size=None, exclude_cl
     """
     model.eval()
     empty = torch.tensor([], dtype=torch.int64, device=model.device)
-    root = (empty, 1.0)
+    root = (empty, 0.0)
     branches = [root]
     for _ in range(output_length):
         candidates = []
@@ -35,9 +35,9 @@ def beam_search(model, x, beam_width, output_length, block_size=None, exclude_cl
             if exclude_classes:
                 logits[exclude_classes] = float('-inf')
             logits = logits / temperature
-            probas = logits.softmax(0)
+            probas = logits.log_softmax(0)
             probas, indices = probas.topk(beam_width)
-            probas *= branch_proba
+            probas += branch_proba
             cand = [(torch.cat([branch_path, indices[i:i+1]]), proba) for i, proba in enumerate(probas)]
             candidates.extend(cand)
         candidates = sorted(candidates, key=lambda c: c[1], reverse=True)

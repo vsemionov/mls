@@ -1,18 +1,21 @@
+from typing import Optional, List
+
 import torch
+import torch.nn as nn
 
 
 @torch.no_grad()
 def sample(
-        model,
-        x,
-        output_length,
-        block_size,
-        eos_class=None,
-        exclude_classes=None,
-        temperature=1,
-        top_k=None,
-        top_p=None,
-        generator=None
+        model: nn.Module,
+        x: torch.Tensor,
+        output_length: int,
+        block_size: Optional[int],
+        eos_class: Optional[int] = None,
+        exclude_classes: Optional[List[int]] = None,
+        temperature: float = 1,
+        top_k: Optional[float] = None,
+        top_p: Optional[float] = None,
+        generator: Optional[torch.Generator] = None
 ):
     """
     Sampling for autoregressive models in PyTorch.
@@ -29,7 +32,7 @@ def sample(
         top_k (float): The number of most likely classes, from which to sample each next class. Set to ``1`` for greedy search.
         top_p (float): The minimum probability of the set of classes to sample from (aka "nucleus sampling" or "dynamic top-k").
             Can be combined with ``top_k``.
-        generator (Generator): A pseudorandom number generator for sampling. Pass ``None`` to use PyTorch's default one.
+        generator (Generator): A pseudorandom number generator for sampling.
 
     Returns:
         Tensor of output class indices (1-d, int64).

@@ -1,18 +1,20 @@
 import collections
+from typing import Optional, List
 
 import torch
+import torch.nn as nn
 
 
 @torch.no_grad()
 def beam_search(
-        model,
-        x,
-        beam_width,
-        output_length,
-        block_size=None,
-        eos_class=None,
-        exclude_classes=None,
-        length_penalty=0
+        model: nn.Module,
+        x: torch.Tensor,
+        beam_width: int,
+        output_length: int,
+        block_size: Optional[int],
+        eos_class: Optional[int] = None,
+        exclude_classes: Optional[List[int]] = None,
+        length_penalty: float = 0
 ):
     """
     Beam search for PyTorch.

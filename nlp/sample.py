@@ -2,7 +2,18 @@ import torch
 
 
 @torch.no_grad()
-def sample(model, x, output_length, block_size, exclude_classes=None, temperature=1, top_k=None, top_p=None):
+def sample(
+        model,
+        x,
+        output_length,
+        block_size,
+        eos_class=None,
+        exclude_classes=None,
+        temperature=1,
+        top_k=None,
+        top_p=None,
+        generator=None
+):
     """
     Sampling for autoregressive models in PyTorch.
     See `How to generate text <https://huggingface.co/blog/how-to-generate>`_.
@@ -10,13 +21,15 @@ def sample(model, x, output_length, block_size, exclude_classes=None, temperatur
     Args:
         model (Module): The model to predict output classes. It is expected to output unnormalized logits.
         x (Tensor): Input class indices (1-d, int64).
-        output_length (int): The number of predictions to generate.
+        output_length (int): The maximum number of predictions to generate.
         block_size (int): The maximum sequence length that the model accepts. ``None`` denotes unlimited.
+        eos_class (int): Index of the end-of-sequence class. Not returned in output. ``None`` denotes unavailable.
         exclude_classes (list[int]): Indices of classes to exclude from results (e.g. padding and unknown).
         temperature (float): A divisor for the logits to flatten (if < 1) or emphasize (if > 1) class probabilities.
         top_k (float): The number of most likely classes, from which to sample each next class. Set to ``1`` for greedy search.
         top_p (float): The minimum probability of the set of classes to sample from (aka "nucleus sampling" or "dynamic top-k").
             Can be combined with ``top_k``.
+        generator (Generator): A pseudorandom number generator for sampling. Pass ``None`` to use PyTorch's default one.
 
     Returns:
         Tensor of output class indices (1-d, int64).
@@ -41,6 +54,8 @@ def sample(model, x, output_length, block_size, exclude_classes=None, temperatur
             nucleus_indices = sorted_indices[-nucleus_size:]
             probas = sorted_probas[-nucleus_size:]
             indices = indices[nucleus_indices]
-        index = probas.multinomial(1)
+        index = probas.multinomial(1, generator=generator)
+        if index == eos_class:
+            break
         seq = torch.cat([seq, indices[index]])
     return seq[x.size(-1):]

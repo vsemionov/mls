@@ -42,5 +42,5 @@ def sample(model, x, output_length, block_size, exclude_classes=None, temperatur
             probas = sorted_probas[-nucleus_size:]
             indices = indices[nucleus_indices]
         index = probas.multinomial(1)
-        seq = torch.cat([seq, indices[index:index+1]])
+        seq = torch.cat([seq, indices[index]])
     return seq[x.size(-1):]

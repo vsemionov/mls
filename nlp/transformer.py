@@ -63,7 +63,6 @@ class MultiHeadSelfAttention(nn.Module):
         q, k, v = self.qkv_proj(x).split(d, dim=2)  # bnd
         q, k, v = [z.view(b, n, h, s).transpose(1, 2) for z in (q, k, v)]  # bhns
 
-        # pre-scale q for memory efficiency
         q = q / math.sqrt(s)
 
         a = q @ k.transpose(2, 3)  # bhnn
